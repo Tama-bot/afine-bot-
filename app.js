@@ -3,7 +3,7 @@ const https = require('https');
 const app = express();
 app.use(express.json());
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyUs1mXQp5cr5UoPSemMbSiR1Mv6lIHho_1iSxnS-Yrt5faIn6SxhZggI7ovmnCW_ky7A/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyKLny6KkZBxmlCNNk6rbW2v36dYE3hC1hkfT1ljGYPxJjRW2fzjymmZtpZ9t9w1wzuhQ/exec";
 
 app.post('/', (req, res) => {
   console.log('Mensaje recibido de Telegram:', JSON.stringify(req.body));
