@@ -8,38 +8,34 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbyUs1mXQp5cr5UoPSemMbSi
 app.post('/', (req, res) => {
   console.log('Mensaje recibido de Telegram:', JSON.stringify(req.body));
   res.json({ status: 'ok' });
-  
-  const body = JSON.stringify(req.body);
-  
-  const makeRequest = (url, redirectCount) => {
-    if (redirectCount > 5) {
-      console.log('Demasiados redirects, abortando');
-      return;
-    }
-    console.log('Enviando a:', url);
+
+  const payload = encodeURIComponent(JSON.stringify(req.body));
+  const fullUrl = GAS_URL + "?payload=" + payload;
+
+  const sendGet = (url) => {
+    console.log('GET a:', url.substring(0, 100));
     const urlObj = new URL(url);
     const r = https.request({
       hostname: urlObj.hostname,
       path: urlObj.pathname + urlObj.search,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+      method: 'GET'
     }, (resp) => {
-      console.log('Respuesta de Google, status:', resp.statusCode);
+      console.log('Status:', resp.statusCode);
       if (resp.statusCode === 301 || resp.statusCode === 302) {
-        console.log('Redirect hacia:', resp.headers.location);
-        makeRequest(resp.headers.location, redirectCount + 1);
+        const loc = resp.headers.location;
+        console.log('Redirect a:', loc.substring(0, 100));
+        sendGet(loc);
       } else {
         let data = '';
         resp.on('data', chunk => data += chunk);
-        resp.on('end', () => console.log('Body de respuesta:', data));
+        resp.on('end', () => console.log('Respuesta final:', data.substring(0, 300)));
       }
     });
-    r.on('error', (e) => console.log('ERROR en request:', e.message));
-    r.write(body);
+    r.on('error', (e) => console.log('ERROR:', e.message));
     r.end();
   };
-  
-  makeRequest(GAS_URL, 0);
+
+  sendGet(fullUrl);
 });
 
 app.get('/', (req, res) => res.send('AFINE Bot OK'));
